@@ -49,7 +49,6 @@ class BloomFilter():
             return murmurhash3_32(x, seed=seed) % m
         return hash_func
   
-    # set the bits for all the k hash function outputs to 1
     def insert(self, key):
         """
         Inserts a key into the Bloom filter by setting the bits at the positions
@@ -66,7 +65,17 @@ class BloomFilter():
 
   # if we encounteer a single 0, return false.
     def test(self, key):
+        """
+        Check if a given key is probably in the set represented by the Bloom filter.
+
+        Args:
+            key: The key to check.
+
+        Returns:
+            True if the key is probably in the set, False otherwise.
+        """
         for hf in self.hash_functions:
             if self.byte_array[hf(key)] == 0:
-                return False
+                return False            
         return True
+
