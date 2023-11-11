@@ -1,4 +1,5 @@
 from BloomFilter import BloomFilter
+from sklearn.utils import murmurhash3_32
 
 class URLShortener:
     def __init__(self):
@@ -7,7 +8,7 @@ class URLShortener:
 
     def shorten_url(self, long_url):
         # Check if the URL is already stored
-        if self.bloom_filter.lookup(long_url):
+        if self.bloom_filter.test(long_url):
             # If it is, return the existing short URL
             return self.urls[long_url]
 
@@ -25,7 +26,7 @@ class URLShortener:
     def generate_short_url(self, long_url):
         # This is a very basic example of generating a short URL.
         # In a real-world application, you would want to use a more robust method.
-        return 'http://short.url/' + str(hash(long_url))
+        return 'http://short.url/' + str(murmurhash3_32(long_url, seed=42, positive=True))
 
     def get_long_url(self, short_url):
         # Return the long URL corresponding to the given short URL

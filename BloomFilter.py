@@ -75,7 +75,7 @@ class BloomFilter():
             True if the key is probably in the set, False otherwise.
         """
         for hf in self.hash_functions:
-            if self.byte_array[hf(key)] == 0:
+            if self.bit_array[hf(key)] == 0:
                 return False            
         return True
 
