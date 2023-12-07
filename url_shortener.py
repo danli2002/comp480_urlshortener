@@ -25,7 +25,6 @@ class URLShortener:
 
     def generate_short_url(self, long_url):
         # This is a very basic example of generating a short URL.
-        # In a real-world application, you would want to use a more robust method.
         return 'http://short.url/' + str(murmurhash3_32(long_url, seed=42, positive=True))
 
     def get_long_url(self, short_url):
