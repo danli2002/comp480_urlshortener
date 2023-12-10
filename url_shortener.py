@@ -22,9 +22,9 @@ class NaiveURLShortener:
         return self.urls.get(short_url, None)
 
 class BloomURLShortener:
-    def __init__(self):
+    def __init__(self, n=1000000, fp=0.001):
         self.urls = {}  # Dictionary to store short URL -> long URL mapping
-        self.bloom_filter = BloomFilter(1000000, 0.001)  # Bloom filter to check if a URL is already stored
+        self.bloom_filter = BloomFilter(n=n, fp_rate=fp)  # Bloom filter to check if a URL is already stored
 
     def shorten_url(self, long_url):
         # Check if the URL is already stored

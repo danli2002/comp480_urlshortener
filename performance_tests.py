@@ -3,19 +3,80 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import random
 import time
-
+import sys
+import math 
 class PerformanceTester:
     def __init__(self):
-        self.bloom_url_shortener = BloomURLShortener()
+        
         self.naive_shortener = NaiveURLShortener()
         data = pd.read_csv('user-ct-test-collection-01.txt', sep="\t")
         self.urllist = list(data.ClickURL.dropna().unique())
-        self.urlstoinsert = random.sample(self.urllist, 10000)
-        self.false_negative_list = self.urlstoinsert[:len(self.urlstoinsert) // 2]
-        self.false_positive_list = self.urlstoinsert[len(self.urlstoinsert) // 2:]
+        self.bloom_url_shortener = BloomURLShortener(n=len(self.urllist))
+        ninety_split = math.floor(len(self.urllist) * 0.9)
+        self.urlstoinsert = self.urllist[:ninety_split]
+        
+        self.urlstotest = self.urllist[ninety_split:]
+        self.false_negative_list = self.urlstotest[:len(self.urlstotest) // 2]
+        self.false_positive_list = self.urlstotest[len(self.urlstotest) // 2:]
     
     def get_sample(self, sample_size):
         return random.choices(self.false_negative_list, k=sample_size)
+    '''
+    Initializing our shorteners
+    '''
+    def insert(self):
+        bloom_start = time.time()
+        for url in self.urlstoinsert:
+            self.bloom_url_shortener.shorten_url(url)
+        bloom_end = time.time()
+
+        naive_start = time.time()
+        for url in self.urlstoinsert:
+            self.naive_shortener.shorten_url(url)
+        naive_end = time.time()
+
+        bloom_total = bloom_end-bloom_start
+        naive_total = naive_end-naive_start
+        print("Insertion times")
+        print("Bloom took :", bloom_total)
+        print("Naive took :", naive_total)
+    '''
+    Want to assert that bloom filter takes less space
+    '''
+    def test_size(self):
+        print("Bloom size in memory:", sys.getsizeof(self.bloom_url_shortener.bloom_filter))
+        print("Naive size in memory:", sys.getsizeof(self.naive_shortener.seen_urls))
+    
+    def test_query(self):
+        # stuff we know is in the set
+        samples = random.choices(self.urlstoinsert, k=1000)
+        start_bloom = time.time()
+        for sample in samples:
+            assert(self.bloom_url_shortener.bloom_filter.test(sample))
+        end_bloom = time.time()
+
+        start_naive = time.time()
+        for sample in samples:
+            assert(sample in self.naive_shortener.urls.values())
+        end_naive = time.time()
+        naive_time = end_naive-start_naive
+        bloom_time = end_bloom-start_bloom
+        print("Naive took: ", naive_time)
+        print("Bloom took: ", bloom_time)
+        speedup = naive_time/bloom_time
+        print("Bloom was " + str(speedup) + " times faster")
+    
+    def test_fp(self):
+        fp = 0
+        print("Length of test set", len(self.urlstotest))
+        for false in self.urlstotest:
+            if self.bloom_url_shortener.bloom_filter.test(false) == True:
+                fp += 1
+        fp_obs = fp / len(self.urlstotest)
+
+        print("Observed fp rate = ", fp_obs)
+        print("Num fp = ", fp)
+
 
     '''
     Want to test performance of shortening a very large number of urls:
@@ -118,7 +179,7 @@ class PerformanceTester:
         plt.clf()
 
     def run_test(self):
-        sample = self.get_sample(100)
+        sample = self.get_sample(10000)
         # bloom_start = time.time()
         bloom_query_times, original_bloom_pairs = self.test_bloom_filter(sample)
         # bloom_end = time.time()
@@ -145,5 +206,9 @@ class PerformanceTester:
 
 if __name__ == '__main__':
     tester = PerformanceTester()
-    tester.run_test()
+    # tester.run_test()
+    tester.insert()
+    tester.test_size()
+    tester.test_query()
+    tester.test_fp()
     
