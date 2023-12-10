@@ -46,7 +46,7 @@ class BloomFilter():
         """
         seed = random.randrange(0,1024)
         def hash_func(x):
-            return murmurhash3_32(x, seed=seed) % m
+            return murmurhash3_32(x, positive=True, seed=seed) % m
         return hash_func
   
     def insert(self, key):

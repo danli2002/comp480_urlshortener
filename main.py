@@ -1,10 +1,10 @@
-from url_shortener import URLShortener
+from url_shortener import BloomURLShortener
 import pandas as pd
 import random
 
 
 if __name__ == '__main__':
-    url_shortener = URLShortener()
+    url_shortener = BloomURLShortener()
     # long_url = 'https://verylongurlwebsite.com/very_long_link_to_a_webpage/very_verylong'
     # short_url = url_shortener.shorten_url(long_url)
     # print(short_url)
